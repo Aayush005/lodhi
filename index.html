@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lodhi Dynasty MCQ Quiz</title>
+    <style>
+        /* Reset some default styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f8ff, #e6f7ff);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Accommodate fixed elements */
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Timer Styling */
+        .timer {
+            position: fixed;          /* Fixes the position relative to the viewport */
+            top: 20px;                /* Positions 20px from the top */
+            right: 20px;              /* Positions 20px from the right */
+            font-size: 1.5rem;        /* Sets a readable font size */
+            color: #d9534f;           /* Sets the text color (red) */
+            font-weight: bold;        /* Makes the text bold */
+            z-index: 1000;            /* Ensures the timer stays above other elements */
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+            padding: 10px 15px;       /* Adds padding around the timer text */
+            border-radius: 5px;       /* Rounds the corners of the timer box */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Adds a subtle shadow for depth */
+        }
+
+        /* Question Map Sidebar Styling */
+        .question-map {
+            position: fixed;          
+            top: 80px;                /* Positioned below the timer */
+            right: 20px;               /* Positioned on the right */
+            width: 180px;              /* Increased width to accommodate 5 columns */
+            background-color: rgba(255, 255, 255, 0.9); 
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 999;             
+            max-height: 90vh;         
+            overflow-y: auto;         
+        }
+
+        .question-map h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #007bff;
+        }
+
+        /* Update #questionLinks to Use CSS Grid */
+        #questionLinks {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 5px; /* Adjust the spacing between links as needed */
+            justify-items: center; /* Centers the links within each grid cell */
+        }
+
+        /* Adjust .question-map .question-link Styling */
+        .question-map .question-link {
+            padding: 5px 0; /* Reduces vertical padding */
+            font-size: 0.9rem; /* Slightly smaller font size for better fit */
+            width: 100%; /* Ensures the link takes the full width of the grid cell */
+            box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+            border-radius: 4px; /* Maintains rounded corners */
+            text-align: center; /* Centers the text within the link */
+            background-color: #f8f9fa;
+            color: #007bff;
+            text-decoration: none;
+            border: 1px solid #007bff;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .question-map .question-link:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        /* Add Correct and Incorrect Classes for Highlighting */
+        .question-map .question-link.correct {
+            background-color: #28a745; /* Green background */
+            color: #fff; /* White text */
+            border-color: #28a745; /* Green border */
+        }
+
+        .question-map .question-link.incorrect {
+            background-color: #dc3545; /* Red background */
+            color: #fff; /* White text */
+            border-color: #dc3545; /* Red border */
+        }
+
+        /* Add Attempted Class for Highlighting */
+        .question-map .question-link.attempted {
+            background-color: #17a2b8; /* Blue background for attempted questions */
+            color: #fff; /* White text */
+            border-color: #17a2b8; /* Blue border */
+        }
+
+        /* Submit Button and Score Styling */
+        .question-map .submit-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .question-map .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .question-map .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .question-map .submit-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .question-map .result {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #17a2b8;
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Quiz Container Styling */
+        .quiz-container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            margin-right: 200px; /* Accommodates the question map sidebar on the right */
+            margin-top: 50px;     /* Maintains spacing from the top */
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .question {
+            margin-bottom: 25px;
+        }
+
+        .question p {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .options label {
+            display: block;
+            margin-bottom: 8px;
+            padding: 10px 15px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options input[type="radio"]:checked + label {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .options label:hover {
+            background-color: #e6f0ff;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .submit-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 30px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            color: #17a2b8;
+        }
+
+        /* Feedback Message Styling */
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .feedback.right {
+            color: #28a745; /* Green for correct answers */
+        }
+
+        .feedback.wrong {
+            color: #dc3545; /* Red for incorrect answers */
+        }
+
+        .feedback.not-attempted {
+            color: #6c757d; /* Gray for not attempted */
+        }
+
+        /* Alert when time is low */
+        .alert {
+            animation: blink 1s steps(5, start) infinite;
+        }
+
+        @keyframes blink {
+            to {
+                visibility: hidden;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .quiz-container {
+                margin-right: 0; /* Removes right margin on small screens */
+            }
+
+            .question-map {
+                display: none; /* Hides the question map on small screens */
+            }
+
+            .toggle-question-map {
+                display: block; /* Shows toggle button on small screens */
+            }
+        }
+
+        /* Toggle Button for Question Map (Visible on Small Screens) */
+        .toggle-question-map {
+            position: fixed;
+            top: 20px;
+            right: 20px; /* Positioned on the right */
+            z-index: 1001;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: none; /* Hidden by default */
+        }
+
+        /* Active State for Question Map on Small Screens */
+        .question-map.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Timer Display -->
+    <div class="timer" id="timer">10:00</div>
+
+    <!-- Toggle Button for Question Map (Visible on Small Screens) -->
+    <button class="toggle-question-map" id="toggleQuestionMap">☰</button>
+
+    <!-- Question Map Sidebar -->
+    <div class="question-map" id="questionMap">
+        <h2>Question Map</h2>
+        <div id="questionLinks">
+            <!-- Question links will be injected here by JavaScript -->
+        </div>
+        <!-- Submit Button and Score Display Below the Question Links -->
+        <div class="submit-section">
+            <button type="button" class="submit-btn" id="submitBtn" onclick="checkAnswers()">Submit</button>
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <div class="quiz-container">
+        <h1>Lodhi Dynasty MCQ Quiz</h1>
+        
+        <form id="quizForm">
+            <!-- Questions will be injected here by JavaScript -->
+        </form>
+
+        <!-- Submit Button and Score Display Below the Questions List -->
+        <div class="submit-section">
+            <button type="button" class="submit-btn" id="submitBtnBelow" onclick="checkAnswers()">Submit</button>
+            <div id="resultBelow" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Declare shuffledQuestions globally
+        let shuffledQuestions = [];
+
+        // Replace the following array with your own questions
+        const questions = [
+    // 1. Founder of the Lodhi Dynasty
+    {
+        id: 'q1',
+        question: 'Who founded the Lodhi Dynasty?',
+        options: [
+            { text: 'Sikandar Lodi', isCorrect: false },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Bahlol Lodi', isCorrect: true },
+            { text: 'Rana Sanga', isCorrect: false }
+        ]
+    },
+    // 2. Accession of Bahlol Lodi
+    {
+        id: 'q2',
+        question: 'On what date did Bahlol Lodi ascend the throne of Delhi?',
+        options: [
+            { text: 'July 17, 1489 AD', isCorrect: false },
+            { text: 'April 19, 1451 AD', isCorrect: true },
+            { text: 'November 1517 AD', isCorrect: false },
+            { text: '1506 AD', isCorrect: false }
+        ]
+    },
+    // 3. Title of Bahlol Lodi
+    {
+        id: 'q3',
+        question: 'What title did Bahlol Lodi hold when he sat on the throne?',
+        options: [
+            { text: 'Sultan Sikandar Shah', isCorrect: false },
+            { text: 'Bahlol Shahgaji', isCorrect: true },
+            { text: 'Ibrahim Shah', isCorrect: false },
+            { text: 'Rana Sanga', isCorrect: false }
+        ]
+    },
+    // 4. Establishment of Afghan State
+    {
+        id: 'q4',
+        question: 'Who is credited with establishing the first Afghan state in Delhi?',
+        options: [
+            { text: 'Sikandar Lodi', isCorrect: false },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Bahlol Lodi', isCorrect: true },
+            { text: 'Babur', isCorrect: false }
+        ]
+    },
+    // 5. Coinage Introduction
+    {
+        id: 'q5',
+        question: 'Which ruler introduced the Bahlol coin into circulation?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: true },
+            { text: 'Sikandar Lodi', isCorrect: false },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Daulat Khan Lodi', isCorrect: false }
+        ]
+    },
+    // 6. Incorporation of Jaunpur
+    {
+        id: 'q6',
+        question: 'In which year did Bahlol Lodi incorporate Jaunpur into the Delhi Sultanate?',
+        options: [
+            { text: '1451 AD', isCorrect: false },
+            { text: '1484 AD', isCorrect: true },
+            { text: '1504 AD', isCorrect: false },
+            { text: '1526 AD', isCorrect: false }
+        ]
+    },
+    // 7. Duration of Bahlol Lodi's Reign
+    {
+        id: 'q7',
+        question: 'How many years did Bahlol Lodi rule?',
+        options: [
+            { text: '25 years', isCorrect: false },
+            { text: '38 years', isCorrect: true },
+            { text: '45 years', isCorrect: false },
+            { text: '50 years', isCorrect: false }
+        ]
+    },
+    // 8. Succession after Bahlol Lodi
+    {
+        id: 'q8',
+        question: 'Who succeeded Bahlol Lodi as the Sultan of Delhi?',
+        options: [
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Rana Sanga', isCorrect: false },
+            { text: 'Nizam Khan', isCorrect: true },
+            { text: 'Daulat Khan Lodi', isCorrect: false }
+        ]
+    },
+    // 9. Establishment of Agra
+    {
+        id: 'q9',
+        question: 'Which ruler established the city of Agra in 1504 AD?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: false },
+            { text: 'Sikandar Lodi', isCorrect: true },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Babur', isCorrect: false }
+        ]
+    },
+    // 10. Capital Relocation
+    {
+        id: 'q10',
+        question: 'In which year did Sikandar Lodi make Agra the capital of the Delhi Sultanate?',
+        options: [
+            { text: '1489 AD', isCorrect: false },
+            { text: '1504 AD', isCorrect: false },
+            { text: '1506 AD', isCorrect: true },
+            { text: '1517 AD', isCorrect: false }
+        ]
+    },
+    // 11. Land Measurement System
+    {
+        id: 'q11',
+        question: 'What is the name of the land measurement system introduced by Sikandar Lodi?',
+        options: [
+            { text: 'Gaj-e-Sikandari', isCorrect: true },
+            { text: 'Bahlol System', isCorrect: false },
+            { text: 'Rana Measurement', isCorrect: false },
+            { text: 'Timur Scale', isCorrect: false }
+        ]
+    },
+    // 12. Gaj-e-Sikandari Conversion
+    {
+        id: 'q12',
+        question: 'According to Gaj-e-Sikandari, how many inches are there in one yond?',
+        options: [
+            { text: '12 inches', isCorrect: false },
+            { text: '24 inches', isCorrect: false },
+            { text: '30 inches', isCorrect: true },
+            { text: '36 inches', isCorrect: false }
+        ]
+    },
+    // 13. Cultural Patronage
+    {
+        id: 'q13',
+        question: 'Under what title did Sultan Sikandar Lodi write Persian poetry?',
+        options: [
+            { text: 'Gulrukhi', isCorrect: true },
+            { text: 'Shahgaji', isCorrect: false },
+            { text: 'Tajiya', isCorrect: false },
+            { text: 'Moth', isCorrect: false }
+        ]
+    },
+    // 14. Religious Policy
+    {
+        id: 'q14',
+        question: 'What religious practice did Sikandar Lodi ban for Muslims?',
+        options: [
+            { text: 'Tajiya', isCorrect: true },
+            { text: 'Fasting', isCorrect: false },
+            { text: 'Hajj', isCorrect: false },
+            { text: 'Prayer', isCorrect: false }
+        ]
+    },
+    // 15. Architectural Contribution
+    {
+        id: 'q15',
+        question: 'Which mosque was built in Delhi during Sikandar Lodi\'s reign?',
+        options: [
+            { text: 'Badalgarh Fort', isCorrect: false },
+            { text: 'Moth Mosque', isCorrect: true },
+            { text: 'Jama Masjid', isCorrect: false },
+            { text: 'Humayun\'s Tomb', isCorrect: false }
+        ]
+    },
+    // 16. Death of Sikandar Lodi
+    {
+        id: 'q16',
+        question: 'What caused the death of Sikandar Lodi in November 1517 AD?',
+        options: [
+            { text: 'Battle wounds', isCorrect: false },
+            { text: 'Throat disease', isCorrect: true },
+            { text: 'Assassination', isCorrect: false },
+            { text: 'Old age', isCorrect: false }
+        ]
+    },
+    // 17. Succession of Ibrahim Lodi
+    {
+        id: 'q17',
+        question: 'Who succeeded Sikandar Lodi as the Sultan of Agra?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: false },
+            { text: 'Rana Sanga', isCorrect: false },
+            { text: 'Ibrahim Lodi', isCorrect: true },
+            { text: 'Babur', isCorrect: false }
+        ]
+    },
+    // 18. Battle with Rana Sanga
+    {
+        id: 'q18',
+        question: 'Which ruler did Ibrahim Lodi fight in 1517-1518 AD?',
+        options: [
+            { text: 'Babur', isCorrect: false },
+            { text: 'Daulat Khan', isCorrect: false },
+            { text: 'Rana Sanga', isCorrect: true },
+            { text: 'Alam Khan', isCorrect: false }
+        ]
+    },
+    // 19. Invitation to Babur
+    {
+        id: 'q19',
+        question: 'Who invited Babur to invade India, leading to the Battle of Panipat?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: false },
+            { text: 'Daulat Khan Lodi and Alam Khan', isCorrect: true },
+            { text: 'Sikandar Lodi', isCorrect: false },
+            { text: 'Rana Sanga', isCorrect: false }
+        ]
+    },
+    // 20. Outcome of the First Battle of Panipat
+    {
+        id: 'q20',
+        question: 'What was the outcome of the First Battle of Panipat in 1526 AD?',
+        options: [
+            { text: 'Ibrahim Lodi won', isCorrect: false },
+            { text: 'Babur was defeated', isCorrect: false },
+            { text: 'Ibrahim Lodi was killed', isCorrect: true },
+            { text: 'Sikandar Lodi regained power', isCorrect: false }
+        ]
+    },
+    // 21. Significance of the Battle of Panipat
+    {
+        id: 'q21',
+        question: 'Which dynasty was established in India after the Battle of Panipat?',
+        options: [
+            { text: 'Lodhi Dynasty', isCorrect: false },
+            { text: 'Mughal Empire', isCorrect: true },
+            { text: 'Timur Dynasty', isCorrect: false },
+            { text: 'Gupta Empire', isCorrect: false }
+        ]
+    },
+    // 22. Main Success of Bahlol Lodi
+    {
+        id: 'q22',
+        question: 'What was Bahlol Lodi\'s main success during his reign?',
+        options: [
+            { text: 'Writing Persian poetry', isCorrect: false },
+            { text: 'Building Moth Mosque', isCorrect: false },
+            { text: 'Including Jaunpur into Delhi Sultanate', isCorrect: true },
+            { text: 'Establishing Agra as capital', isCorrect: false }
+        ]
+    },
+    // 23. Title of Ibrahim Lodi
+    {
+        id: 'q23',
+        question: 'What title did Ibrahim Lodi hold?',
+        options: [
+            { text: 'Bahlol Shahgaji', isCorrect: false },
+            { text: 'Sultan Sikandar Shah', isCorrect: false },
+            { text: 'Ibrahim Shah', isCorrect: true },
+            { text: 'Rana Shah', isCorrect: false }
+        ]
+    },
+    // 24. Establishment of Agra
+    {
+        id: 'q24',
+        question: 'Which river is Agra located along, established by Sikandar Lodi?',
+        options: [
+            { text: 'Ganges', isCorrect: false },
+            { text: 'Yamuna', isCorrect: true },
+            { text: 'Indus', isCorrect: false },
+            { text: 'Brahmaputra', isCorrect: false }
+        ]
+    },
+    // 25. Poetry and Literature
+    {
+        id: 'q25',
+        question: 'Sultan Sikandar Lodi was known for writing poetry in which language?',
+        options: [
+            { text: 'Arabic', isCorrect: false },
+            { text: 'Hindi', isCorrect: false },
+            { text: 'Persian', isCorrect: true },
+            { text: 'Sanskrit', isCorrect: false }
+        ]
+    },
+    // 26. Key Architectural Structure in Agra
+    {
+        id: 'q26',
+        question: 'What fort did Sikandar Lodi build in Agra?',
+        options: [
+            { text: 'Red Fort', isCorrect: false },
+            { text: 'Moth Mosque', isCorrect: false },
+            { text: 'Badalgarh Fort', isCorrect: true },
+            { text: 'Agra Fort', isCorrect: false }
+        ]
+    },
+    // 27. Death of Bahlol Lodi
+    {
+        id: 'q27',
+        question: 'In which year did Bahlol Lodi die?',
+        options: [
+            { text: '1451 AD', isCorrect: false },
+            { text: '1484 AD', isCorrect: false },
+            { text: '1489 AD', isCorrect: true },
+            { text: '1517 AD', isCorrect: false }
+        ]
+    },
+    // 28. Reign Period of Sikandar Lodi
+    {
+        id: 'q28',
+        question: 'How long did Sikandar Lodi rule?',
+        options: [
+            { text: '28 years', isCorrect: true },
+            { text: '38 years', isCorrect: false },
+            { text: '20 years', isCorrect: false },
+            { text: '10 years', isCorrect: false }
+        ]
+    },
+    // 29. Key Battles of the Lodhi Dynasty
+    {
+        id: 'q29',
+        question: 'Which battle marked the end of the Lodhi Dynasty?',
+        options: [
+            { text: 'Battle of Ghatoli', isCorrect: false },
+            { text: 'First Battle of Panipat', isCorrect: true },
+            { text: 'Second Battle of Panipat', isCorrect: false },
+            { text: 'Battle of Delhi', isCorrect: false }
+        ]
+    },
+    // 30. Architectural Contributions
+    {
+        id: 'q30',
+        question: 'Which two cities saw significant architectural contributions from the Lodhi Dynasty?',
+        options: [
+            { text: 'Delhi and Agra', isCorrect: true },
+            { text: 'Lahore and Delhi', isCorrect: false },
+            { text: 'Agra and Jaipur', isCorrect: false },
+            { text: 'Delhi and Mumbai', isCorrect: false }
+        ]
+    },
+    // 31. Administrative Reforms
+    {
+        id: 'q31',
+        question: 'What administrative reform did the Lodhi Dynasty introduce?',
+        options: [
+            { text: 'New currency system', isCorrect: false },
+            { text: 'Land measurement system', isCorrect: true },
+            { text: 'Taxation reforms', isCorrect: false },
+            { text: 'Judicial system', isCorrect: false }
+        ]
+    },
+    // 32. Cultural Impact
+    {
+        id: 'q32',
+        question: 'The Lodhi Dynasty is known for patronizing which type of literature?',
+        options: [
+            { text: 'Sanskrit', isCorrect: false },
+            { text: 'Persian', isCorrect: true },
+            { text: 'Arabic', isCorrect: false },
+            { text: 'Urdu', isCorrect: false }
+        ]
+    },
+    // 33. Political Impact
+    {
+        id: 'q33',
+        question: 'The end of the Lodhi Dynasty led to the rise of which empire in India?',
+        options: [
+            { text: 'Gupta Empire', isCorrect: false },
+            { text: 'Maratha Empire', isCorrect: false },
+            { text: 'Mughal Empire', isCorrect: true },
+            { text: 'British Empire', isCorrect: false }
+        ]
+    },
+    // 34. Legacy of Lodhi Dynasty
+    {
+        id: 'q34',
+        question: 'Which of the following is part of the Lodhi Dynasty\'s legacy?',
+        options: [
+            { text: 'Establishment of Delhi University', isCorrect: false },
+            { text: 'Development of significant infrastructure', isCorrect: true },
+            { text: 'Introduction of Hindi as official language', isCorrect: false },
+            { text: 'Expansion into Southeast Asia', isCorrect: false }
+        ]
+    },
+    // 35. Ascension Title
+    {
+        id: 'q35',
+        question: 'What title did Sikandar Lodi assume upon his accession to the throne?',
+        options: [
+            { text: 'Sultan Sikandar Shah', isCorrect: true },
+            { text: 'Bahlol Shahgaji', isCorrect: false },
+            { text: 'Ibrahim Shah', isCorrect: false },
+            { text: 'Rana Sanga', isCorrect: false }
+        ]
+    },
+    // 36. Dual Achievements
+    {
+        id: 'q36',
+        question: 'Which ruler is credited with both establishing Agra and introducing the Gaj-e-Sikandari measurement system?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: false },
+            { text: 'Sikandar Lodi', isCorrect: true },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Daulat Khan Lodi', isCorrect: false }
+        ]
+    },
+    // 37. Vizier's Contribution
+    {
+        id: 'q37',
+        question: 'Who was responsible for constructing the Moth Mosque in Delhi?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: false },
+            { text: 'Sikandar Lodi\'s vizier', isCorrect: true },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Rana Sanga', isCorrect: false }
+        ]
+    },
+    // 38. Familial Succession
+    {
+        id: 'q38',
+        question: 'How was Ibrahim Lodi related to Sikandar Lodi?',
+        options: [
+            { text: 'Brother', isCorrect: false },
+            { text: 'Son', isCorrect: true },
+            { text: 'Uncle', isCorrect: false },
+            { text: 'Cousin', isCorrect: false }
+        ]
+    },
+    // 39. Significant Death
+    {
+        id: 'q39',
+        question: 'The death of which ruler in 1526 AD marked the end of the Lodhi Dynasty?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: false },
+            { text: 'Sikandar Lodi', isCorrect: false },
+            { text: 'Ibrahim Lodi', isCorrect: true },
+            { text: 'Rana Sanga', isCorrect: false }
+        ]
+    },
+    // 40. Dual Event Reign
+    {
+        id: 'q40',
+        question: 'During whose reign was Jaunpur incorporated into the Delhi Sultanate and the Bahlol coin introduced?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: true },
+            { text: 'Sikandar Lodi', isCorrect: false },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Babur', isCorrect: false }
+        ]
+    },
+    // 41. Policy Implementation
+    {
+        id: 'q41',
+        question: 'Which ruler implemented a ban on Muslims performing Tajiya?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: false },
+            { text: 'Sikandar Lodi', isCorrect: true },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Rana Sanga', isCorrect: false }
+        ]
+    },
+    // 42. Cultural Patronage
+    {
+        id: 'q42',
+        question: 'Under what pseudonym did Sikandar Lodi compose Persian poetry?',
+        options: [
+            { text: 'Shahgaji', isCorrect: false },
+            { text: 'Gulrukhi', isCorrect: true },
+            { text: 'Tajiya', isCorrect: false },
+            { text: 'Moth', isCorrect: false }
+        ]
+    },
+    // 43. Land Measurement Details
+    {
+        id: 'q43',
+        question: 'In the Gaj-e-Sikandari system, how many inches make up one yard?',
+        options: [
+            { text: '12 inches', isCorrect: false },
+            { text: '24 inches', isCorrect: false },
+            { text: '30 inches', isCorrect: true },
+            { text: '36 inches', isCorrect: false }
+        ]
+    },
+    // 44. Foundational Establishments
+    {
+        id: 'q44',
+        question: 'Which ruler is credited with founding the first Afghan state in Delhi?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: true },
+            { text: 'Sikandar Lodi', isCorrect: false },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Rana Sanga', isCorrect: false }
+        ]
+    },
+    // 45. Capital Shifts
+    {
+        id: 'q45',
+        question: 'In which year did Sikandar Lodi relocate the capital to Agra?',
+        options: [
+            { text: '1489 AD', isCorrect: false },
+            { text: '1504 AD', isCorrect: false },
+            { text: '1506 AD', isCorrect: true },
+            { text: '1517 AD', isCorrect: false }
+        ]
+    },
+    // 46. Reign Duration Comparison
+    {
+        id: 'q46',
+        question: 'Who had a longer reign, Bahlol Lodi or Sikandar Lodi?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: true },
+            { text: 'Sikandar Lodi', isCorrect: false },
+            { text: 'Both ruled for the same duration', isCorrect: false },
+            { text: 'Not specified', isCorrect: false }
+        ]
+    },
+    // 47. Final Battle Outcome
+    {
+        id: 'q47',
+        question: 'What was the immediate consequence of Ibrahim Lodi\'s defeat in the First Battle of Panipat?',
+        options: [
+            { text: 'Sikandar Lodi regained power', isCorrect: false },
+            { text: 'Establishment of the Mughal Empire', isCorrect: true },
+            { text: 'Bahlol Lodi was reinstated', isCorrect: false },
+            { text: 'Rana Sanga became Sultan', isCorrect: false }
+        ]
+    },
+    // 48. Ruler's Death Cause
+    {
+        id: 'q48',
+        question: 'What ailment led to the death of Sikandar Lodi?',
+        options: [
+            { text: 'Battle injuries', isCorrect: false },
+            { text: 'Throat disease', isCorrect: true },
+            { text: 'Assassination', isCorrect: false },
+            { text: 'Old age', isCorrect: false }
+        ]
+    },
+    // 49. Administrative Innovations
+    {
+        id: 'q49',
+        question: 'Which administrative reform was introduced by Sikandar Lodi?',
+        options: [
+            { text: 'New taxation system', isCorrect: false },
+            { text: 'Land measurement system', isCorrect: true },
+            { text: 'Judicial reforms', isCorrect: false },
+            { text: 'Military restructuring', isCorrect: false }
+        ]
+    },
+    // 50. Succession Chain
+    {
+        id: 'q50',
+        question: 'After Sikandar Lodi\'s death, who ascended to the throne?',
+        options: [
+            { text: 'Bahlol Lodi', isCorrect: false },
+            { text: 'Rana Sanga', isCorrect: false },
+            { text: 'Ibrahim Lodi', isCorrect: true },
+            { text: 'Daulat Khan Lodi', isCorrect: false }
+        ]
+    },
+    // 51. Literary Contributions
+    {
+        id: 'q51',
+        question: 'Sultan Sikandar Lodi is renowned for his contributions to which form of literature?',
+        options: [
+            { text: 'Sanskrit epics', isCorrect: false },
+            { text: 'Arabic prose', isCorrect: false },
+            { text: 'Persian poetry', isCorrect: true },
+            { text: 'Hindi folk tales', isCorrect: false }
+        ]
+    },
+    // 52. Architectural Achievements
+    {
+        id: 'q52',
+        question: 'Which significant structure did Sikandar Lodi build in Agra?',
+        options: [
+            { text: 'Moth Mosque', isCorrect: false },
+            { text: 'Badalgarh Fort', isCorrect: true },
+            { text: 'Red Fort', isCorrect: false },
+            { text: 'Jama Masjid', isCorrect: false }
+        ]
+    },
+    // 53. Battle Participants
+    {
+        id: 'q53',
+        question: 'Who were the key figures that invited Babur to invade India?',
+        options: [
+            { text: 'Bahlol Lodi and Sikandar Lodi', isCorrect: false },
+            { text: 'Daulat Khan Lodi and Alam Khan', isCorrect: true },
+            { text: 'Ibrahim Lodi and Rana Sanga', isCorrect: false },
+            { text: 'Sikandar Lodi and Alam Khan', isCorrect: false }
+        ]
+    },
+    // 54. Cultural Policies
+    {
+        id: 'q54',
+        question: 'What cultural restriction did Sikandar Lodi impose on Muslims?',
+        options: [
+            { text: 'Prohibition of mosque building', isCorrect: false },
+            { text: 'Ban on Tajiya procession', isCorrect: true },
+            { text: 'Restriction on poetry writing', isCorrect: false },
+            { text: 'Limit on land ownership', isCorrect: false }
+        ]
+    },
+    // 55. Foundational Dates
+    {
+        id: 'q55',
+        question: 'In which year did Bahlol Lodi die, ending his 38-year reign?',
+        options: [
+            { text: '1451 AD', isCorrect: false },
+            { text: '1484 AD', isCorrect: false },
+            { text: '1489 AD', isCorrect: true },
+            { text: '1517 AD', isCorrect: false }
+        ]
+    },
+    // 56. Ruler's Achievements
+    {
+        id: 'q56',
+        question: 'Which ruler is credited with incorporating Jaunpur into the Delhi Sultanate in 1484 AD?',
+        options: [
+            { text: 'Sikandar Lodi', isCorrect: false },
+            { text: 'Ibrahim Lodi', isCorrect: false },
+            { text: 'Bahlol Lodi', isCorrect: true },
+            { text: 'Daulat Khan Lodi', isCorrect: false }
+        ]
+    },
+    // 57. Succession Titles
+    {
+        id: 'q57',
+        question: 'What title did Ibrahim Lodi hold when he ascended to the throne?',
+        options: [
+            { text: 'Sultan Sikandar Shah', isCorrect: false },
+            { text: 'Bahlol Shahgaji', isCorrect: false },
+            { text: 'Ibrahim Shah', isCorrect: true },
+            { text: 'Rana Shah', isCorrect: false }
+        ]
+    },
+    // 58. Legacy Impact
+    {
+        id: 'q58',
+        question: 'Which dynasty succeeded the Lodhi Dynasty after their defeat in the Battle of Panipat?',
+        options: [
+            { text: 'Gupta Dynasty', isCorrect: false },
+            { text: 'Maratha Dynasty', isCorrect: false },
+            { text: 'Mughal Dynasty', isCorrect: true },
+            { text: 'British Empire', isCorrect: false }
+        ]
+    },
+    // 59. Infrastructure Development
+    {
+        id: 'q59',
+        question: 'The development of which two cities is considered a significant legacy of the Lodhi Dynasty?',
+        options: [
+            { text: 'Delhi and Agra', isCorrect: true },
+            { text: 'Lahore and Delhi', isCorrect: false },
+            { text: 'Agra and Jaipur', isCorrect: false },
+            { text: 'Delhi and Mumbai', isCorrect: false }
+        ]
+    },
+    // 60. Measurement Standards
+    {
+        id: 'q60',
+        question: 'What was the standard length of one yard in the Gaj-e-Sikandari system introduced by Sikandar Lodi?',
+        options: [
+            { text: '12 inches', isCorrect: false },
+            { text: '24 inches', isCorrect: false },
+            { text: '30 inches', isCorrect: true },
+            { text: '36 inches', isCorrect: false }
+        ]
+    }
+];
+
+
+
+        // Function to shuffle an array using Fisher-Yates algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Function to render the questions dynamically
+        function renderQuestions() {
+            const quizForm = document.getElementById('quizForm');
+            const questionsArray = getQuestions(); // Retrieve the questions array
+            if (!questionsArray || !Array.isArray(questionsArray) || questionsArray.length < 25) {
+                quizForm.innerHTML = '<p>Insufficient questions available. Please ensure there are at least 25 questions in the questions array.</p>';
+                return;
+            }
+
+            // Randomly select 25 questions from the available questions
+            const selectedQuestions = getRandomQuestions(questionsArray, 25);
+
+            // Assign shuffledQuestions to the global variable
+            shuffledQuestions = shuffleArray([...selectedQuestions]); // Create a copy and shuffle
+
+            shuffledQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('question');
+                questionDiv.id = `question-${index + 1}`; // Assign unique ID
+
+                // Question text
+                const questionText = document.createElement('p');
+                questionText.textContent = `${index + 1}. ${q.question}`;
+                questionDiv.appendChild(questionText);
+
+                // Options
+                const optionsDiv = document.createElement('div');
+                optionsDiv.classList.add('options');
+
+                // Shuffle options and assign back to q.options
+                q.options = shuffleArray([...q.options]);
+                const shuffledOptions = q.options;
+
+                // Assign labels A, B, C, D dynamically
+                const labels = ['A', 'B', 'C', 'D'];
+
+                shuffledOptions.forEach((option, optIndex) => {
+                    const optionId = `${q.id}_option${optIndex + 1}`; // Unique ID for each option
+
+                    const radioInput = document.createElement('input');
+                    radioInput.type = 'radio';
+                    radioInput.id = optionId;
+                    radioInput.name = q.id;
+                    radioInput.value = labels[optIndex]; // Assign label as value
+
+                    const label = document.createElement('label');
+                    label.htmlFor = optionId;
+                    label.textContent = `${labels[optIndex]}) ${option.text}`;
+
+                    optionsDiv.appendChild(radioInput);
+                    optionsDiv.appendChild(label);
+
+                    // Add Attempted Class when an option is selected
+                    radioInput.addEventListener('change', function() {
+                        const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                        if (questionMapLink && !questionMapLink.classList.contains('correct') && !questionMapLink.classList.contains('incorrect')) {
+                            questionMapLink.classList.add('attempted');
+                        }
+                    });
+                });
+
+                questionDiv.appendChild(optionsDiv);
+
+                // Add Feedback Div Below Options
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.classList.add('feedback');
+                feedbackDiv.id = `feedback-${index + 1}`; // Unique ID for each feedback div
+                questionDiv.appendChild(feedbackDiv);
+
+                quizForm.appendChild(questionDiv);
+            });
+
+            generateQuestionMap(shuffledQuestions.length);
+        }
+
+        // Function to retrieve the questions array
+        function getQuestions() {
+            // Replace this with your actual questions array
+            return questions; // Assuming 'questions' is defined globally
+        }
+
+        // Function to randomly select n questions from the questions array
+        function getRandomQuestions(questionsArray, n) {
+            const shuffled = shuffleArray([...questionsArray]);
+            return shuffled.slice(0, n);
+        }
+
+        // Function to generate the Question Map links
+        function generateQuestionMap(totalQuestions) {
+            const questionLinksDiv = document.getElementById('questionLinks');
+            questionLinksDiv.innerHTML = ''; // Clear any existing links
+
+            for (let i = 1; i <= totalQuestions; i++) {
+                const link = document.createElement('a');
+                link.href = `#question-${i}`;
+                link.classList.add('question-link');
+                link.textContent = `Q${i}`;
+
+                questionLinksDiv.appendChild(link);
+            }
+        }
+
+        // Timer Functionality
+        function startTimer(duration, display) {
+            let timer = duration, minutes, seconds;
+            const countdown = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                // Add alert class when time is less than 1 minute
+                if (timer <= 60 && timer > 0) { // 60 seconds = 1 minute
+                    display.classList.add('alert');
+                }
+
+                if (--timer < 0) {
+                    clearInterval(countdown);
+                    autoSubmit();
+                }
+            }, 1000);
+        }
+
+        // Function to automatically submit the quiz when time is up
+        function autoSubmit() {
+            alert("Time's up! The quiz will now be submitted.");
+            checkAnswers();
+        }
+
+        // Initialize the quiz on page load
+        window.onload = function () {
+            renderQuestions(); // Render questions on page load
+            const tenMinutes = 60 * 10, // 10 minutes in seconds
+                  display = document.getElementById('timer');
+            startTimer(tenMinutes, display);
+        };
+
+        // Function to check answers and display the result
+        function checkAnswers() {
+            let score = 0;
+            let totalQuestions = shuffledQuestions.length; // Total number of questions
+
+            shuffledQuestions.forEach((q, index) => { // Iterate over each question
+                const selectedOption = document.querySelector(`input[name="${q.id}"]:checked`);
+                const feedbackDiv = document.getElementById(`feedback-${index + 1}`);
+                
+                if (selectedOption) {
+                    // Get the selected label (A, B, C, D)
+                    const selectedLabel = selectedOption.value;
+                    // Map label to option index
+                    const labelIndex = ['A', 'B', 'C', 'D'].indexOf(selectedLabel);
+                    if (labelIndex !== -1 && q.options[labelIndex].isCorrect) {
+                        score += 1; // Add 1 mark for correct answer
+
+                        // Mark the question link as correct in the Question Map
+                        const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                        if (questionMapLink) {
+                            questionMapLink.classList.add('correct');
+                            questionMapLink.classList.remove('incorrect', 'attempted');
+                        }
+
+                        // Update Feedback Below the Question
+                        if (feedbackDiv) {
+                            feedbackDiv.textContent = 'Right';
+                            feedbackDiv.classList.add('right');
+                            feedbackDiv.classList.remove('wrong', 'not-attempted');
+                        }
+                    } else {
+                        score -= 0.5; // Deduct 0.5 marks for incorrect answer
+
+                        // Mark the question link as incorrect in the Question Map
+                        const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                        if (questionMapLink) {
+                            questionMapLink.classList.add('incorrect');
+                            questionMapLink.classList.remove('correct', 'attempted');
+                        }
+
+                        // Update Feedback Below the Question
+                        if (feedbackDiv) {
+                            feedbackDiv.textContent = 'Wrong';
+                            feedbackDiv.classList.add('wrong');
+                            feedbackDiv.classList.remove('right', 'not-attempted');
+                        }
+                    }
+                } else {
+                    // If the question was not answered, mark as not attempted
+                    const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                    if (questionMapLink) {
+                        // Remove both classes if the question was not answered
+                        questionMapLink.classList.remove('correct', 'incorrect', 'attempted');
+                    }
+
+                    // Update Feedback Below the Question
+                    if (feedbackDiv) {
+                        feedbackDiv.textContent = 'Not Attempted';
+                        feedbackDiv.classList.add('not-attempted');
+                        feedbackDiv.classList.remove('right', 'wrong');
+                    }
+                }
+            });
+
+            // Round the score to one decimal place
+            score = Math.round(score * 10) / 10;
+
+            // Update the result in the Question Map Sidebar
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = `You scored ${score} out of ${totalQuestions}`;
+
+            // Update the result below the questions list
+            const resultDivBelow = document.getElementById('resultBelow');
+            resultDivBelow.textContent = `You scored ${score} out of ${totalQuestions}`;
+
+            // Disable all inputs to prevent changes after submission
+            const inputs = document.querySelectorAll('input[type="radio"]');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+
+            // Disable the submit buttons to prevent multiple submissions
+            const submitButton = document.getElementById('submitBtn');
+            submitButton.disabled = true;
+
+            const submitButtonBelow = document.getElementById('submitBtnBelow');
+            if (submitButtonBelow) {
+                submitButtonBelow.disabled = true;
+            }
+        }
+
+        // Toggle Question Map on small screens
+        const toggleBtn = document.getElementById('toggleQuestionMap');
+        const questionMap = document.getElementById('questionMap');
+
+        toggleBtn.addEventListener('click', () => {
+            questionMap.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
